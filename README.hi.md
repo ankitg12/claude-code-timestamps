@@ -26,43 +26,57 @@ SessionEnd says:       [09:22:01 AM] — session ending (logout) — Claude 4m12
 
 ## इंस्टॉल करें
 
-यह पूरा block Claude के chat में paste करें:
+### विकल्प A — Claude से करवाएं (recommended)
+
+यह पूरा block Claude Code chat में paste करें:
 
 ```
-Please install claude-code-timestamps from https://github.com/ankitg12/claude-code-timestamps globally (under ~/.claude/, NOT the current project). Steps:
-
-1. Download timestamps.py to ~/.claude/hooks/ (create if needed):
+Please install claude-code-timestamps globally (under ~/.claude/):
+1. Download to ~/.claude/hooks/timestamps.py (create dir if needed):
    https://raw.githubusercontent.com/ankitg12/claude-code-timestamps/main/timestamps.py
-2. Merge these hooks into ~/.claude/settings.json (preserve existing config):
-   - SessionStart       → python "$HOME/.claude/hooks/timestamps.py" session_start   [async: true]
-   - UserPromptSubmit   → python "$HOME/.claude/hooks/timestamps.py" prompt
-   - PostToolUse        → python "$HOME/.claude/hooks/timestamps.py" tool            [async: true]
-   - PostToolUseFailure → python "$HOME/.claude/hooks/timestamps.py" tool_fail
-   - SubagentStart      → python "$HOME/.claude/hooks/timestamps.py" subagent_start  [async: true]
-   - SubagentStop       → python "$HOME/.claude/hooks/timestamps.py" subagent_stop
-   - TaskCreated        → python "$HOME/.claude/hooks/timestamps.py" task_create     [async: true]
-   - TaskCompleted      → python "$HOME/.claude/hooks/timestamps.py" task_done
-   - PreCompact         → python "$HOME/.claude/hooks/timestamps.py" pre_compact
-   - PostCompact        → python "$HOME/.claude/hooks/timestamps.py" post_compact
-   - Stop               → python "$HOME/.claude/hooks/timestamps.py" stop
-   - SessionEnd         → python "$HOME/.claude/hooks/timestamps.py" session_end     [async: true]
-   Each hook type is "command".
+2. Merge the hooks from https://github.com/ankitg12/claude-code-timestamps into ~/.claude/settings.json
+   preserving all existing config. The hooks block is in the README.
 3. Validate settings.json is valid JSON, then run /hooks to activate.
 ```
 
-## मैनुअल इंस्टॉल (विकल्प)
+### विकल्प B — Manual
 
-अगर आप Claude की सहायता के बिना install करना पसंद करते हैं:
+**1. Script download करें:**
 
-1. **Hook script download करें:**
-   ```bash
-   mkdir -p ~/.claude/hooks
-   curl -o ~/.claude/hooks/timestamps.py https://raw.githubusercontent.com/ankitg12/claude-code-timestamps/main/timestamps.py
-   chmod +x ~/.claude/hooks/timestamps.py  # (Unix/macOS/WSL)
-   ```
+```bash
+mkdir -p ~/.claude/hooks
+curl -o ~/.claude/hooks/timestamps.py \
+  https://raw.githubusercontent.com/ankitg12/claude-code-timestamps/main/timestamps.py
+```
 
-2. **`~/.claude/settings.json` में hooks add करें:**
-   `hooks` section को edit करें और प्रत्येक event type के लिए entries add करें जैसा ऊपर listed है। प्रत्येक entry एक Claude Code event को एक command से map करता है जो `timestamps.py` को event name के साथ invoke करता है। Claude Code के hooks documentation को refer करें `settings.json` syntax के लिए। Restart से पहले JSON को validate करें।
+**2. `~/.claude/settings.json` में add करें:**
+
+नीचे दिया गया `hooks` block अपने existing `~/.claude/settings.json` में merge करें।
+अगर आपके पास कोई existing hooks नहीं हैं, तो इसे `"env"`, `"model"` आदि के साथ top-level key के रूप में paste करें।
+
+> **Windows:** `~/.claude/hooks/timestamps.py` को full path से replace करें,
+> जैसे `C:/Users/YourName/.claude/hooks/timestamps.py`
+
+```json
+{
+  "hooks": {
+    "SessionStart":       [{"matcher":"","hooks":[{"type":"command","command":"python \"~/.claude/hooks/timestamps.py\" session_start","async":true}]}],
+    "UserPromptSubmit":   [{"matcher":"","hooks":[{"type":"command","command":"python \"~/.claude/hooks/timestamps.py\" prompt"}]}],
+    "PostToolUse":        [{"matcher":"","hooks":[{"type":"command","command":"python \"~/.claude/hooks/timestamps.py\" tool","async":true}]}],
+    "PostToolUseFailure": [{"matcher":"","hooks":[{"type":"command","command":"python \"~/.claude/hooks/timestamps.py\" tool_fail"}]}],
+    "SubagentStart":      [{"matcher":"","hooks":[{"type":"command","command":"python \"~/.claude/hooks/timestamps.py\" subagent_start","async":true}]}],
+    "SubagentStop":       [{"matcher":"","hooks":[{"type":"command","command":"python \"~/.claude/hooks/timestamps.py\" subagent_stop"}]}],
+    "TaskCreated":        [{"matcher":"","hooks":[{"type":"command","command":"python \"~/.claude/hooks/timestamps.py\" task_create","async":true}]}],
+    "TaskCompleted":      [{"matcher":"","hooks":[{"type":"command","command":"python \"~/.claude/hooks/timestamps.py\" task_done"}]}],
+    "PreCompact":         [{"matcher":"","hooks":[{"type":"command","command":"python \"~/.claude/hooks/timestamps.py\" pre_compact"}]}],
+    "PostCompact":        [{"matcher":"","hooks":[{"type":"command","command":"python \"~/.claude/hooks/timestamps.py\" post_compact"}]}],
+    "Stop":               [{"matcher":"","hooks":[{"type":"command","command":"python \"~/.claude/hooks/timestamps.py\" stop"}]}],
+    "SessionEnd":         [{"matcher":"","hooks":[{"type":"command","command":"python \"~/.claude/hooks/timestamps.py\" session_end","async":true}]}]
+  }
+}
+```
+
+**3. Reload:** Claude Code में `/hooks` run करें (restart की जरूरत नहीं — settings file-watched हैं)।
 
 ## कवर की गई घटनाएं
 
