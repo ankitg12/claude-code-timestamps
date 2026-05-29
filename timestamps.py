@@ -160,7 +160,7 @@ def main() -> None:
     elif mode == "tool":
         data = read_stdin()
         tool = data.get("tool_name", "tool")
-        additional_ctx("PostToolUse", f"[{now()}] {tool} completed")
+        sys_msg(f"[{now()}] {tool} completed")
 
     elif mode == "tool_fail":
         data = read_stdin()
