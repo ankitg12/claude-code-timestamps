@@ -145,7 +145,17 @@ def main() -> None:
             sess_f.write_text(str(t), encoding="utf-8")
         if not total_f.exists():
             total_f.write_text("0", encoding="utf-8")
-        sys_msg(f"[{now()}] — user message received")
+        # Idle gap: tell Claude how long the user was away if > 1 minute
+        idle_part = ""
+        last_stop_f = _TIMING_DIR / f"{sid}.last_stop"
+        if last_stop_f.exists():
+            try:
+                gap = t - float(last_stop_f.read_text(encoding="utf-8"))
+                if gap > 60:
+                    idle_part = f" (after {fmt_secs(gap)} idle)"
+            except Exception:
+                pass
+        sys_msg(f"[{now()}] — user message received{idle_part}")
 
     elif mode == "tool":
         data = read_stdin()
@@ -213,6 +223,7 @@ def main() -> None:
         except Exception:
             pass
         sys_msg(f"[{now()}] — response complete{turn_part}{session_part}")
+        (_TIMING_DIR / f"{sid}.last_stop").write_text(str(t), encoding="utf-8")
 
     elif mode == "session_end":
         data = read_stdin()
@@ -226,7 +237,7 @@ def main() -> None:
             wall = (t - float(sess_f.read_text(encoding="utf-8"))) if sess_f.exists() else 0.0
             if wall > 0:
                 stats = f" — Claude {fmt_secs(total)} | wall {fmt_secs(wall)}"
-            for f in (turn_f, sess_f, total_f):
+            for f in (turn_f, sess_f, total_f, _TIMING_DIR / f"{sid}.last_stop"):
                 f.unlink(missing_ok=True)
         except Exception:
             pass

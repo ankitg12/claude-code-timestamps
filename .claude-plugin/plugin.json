@@ -1,0 +1,51 @@
+{
+  "name": "claude-code-timestamps",
+  "version": "1.0.0",
+  "description": "Wall-clock timestamps at 12 CC lifecycle events. Idle gap detection, per-session timing, Claude compute vs wall time. Zero dependencies.",
+  "author": {
+    "name": "Ankit Gaur",
+    "url": "https://github.com/ankitg12"
+  },
+  "homepage": "https://github.com/ankitg12/claude-code-timestamps",
+  "repository": "https://github.com/ankitg12/claude-code-timestamps",
+  "license": "MIT",
+  "keywords": ["timestamps", "hooks", "productivity", "session-timing", "lifecycle"],
+  "hooks": {
+    "SessionStart": [
+      {"matcher":"","hooks":[{"type":"command","command":"python","args":["${CLAUDE_PLUGIN_ROOT}/timestamps.py","session_start"],"async":true}]}
+    ],
+    "UserPromptSubmit": [
+      {"matcher":"","hooks":[{"type":"command","command":"python","args":["${CLAUDE_PLUGIN_ROOT}/timestamps.py","prompt"]}]}
+    ],
+    "PostToolUse": [
+      {"matcher":"","hooks":[{"type":"command","command":"python","args":["${CLAUDE_PLUGIN_ROOT}/timestamps.py","tool"],"async":true}]}
+    ],
+    "PostToolUseFailure": [
+      {"matcher":"","hooks":[{"type":"command","command":"python","args":["${CLAUDE_PLUGIN_ROOT}/timestamps.py","tool_fail"]}]}
+    ],
+    "SubagentStart": [
+      {"matcher":"","hooks":[{"type":"command","command":"python","args":["${CLAUDE_PLUGIN_ROOT}/timestamps.py","subagent_start"],"async":true}]}
+    ],
+    "SubagentStop": [
+      {"matcher":"","hooks":[{"type":"command","command":"python","args":["${CLAUDE_PLUGIN_ROOT}/timestamps.py","subagent_stop"]}]}
+    ],
+    "TaskCreated": [
+      {"matcher":"","hooks":[{"type":"command","command":"python","args":["${CLAUDE_PLUGIN_ROOT}/timestamps.py","task_create"],"async":true}]}
+    ],
+    "TaskCompleted": [
+      {"matcher":"","hooks":[{"type":"command","command":"python","args":["${CLAUDE_PLUGIN_ROOT}/timestamps.py","task_done"]}]}
+    ],
+    "PreCompact": [
+      {"matcher":"","hooks":[{"type":"command","command":"python","args":["${CLAUDE_PLUGIN_ROOT}/timestamps.py","pre_compact"]}]}
+    ],
+    "PostCompact": [
+      {"matcher":"","hooks":[{"type":"command","command":"python","args":["${CLAUDE_PLUGIN_ROOT}/timestamps.py","post_compact"]}]}
+    ],
+    "Stop": [
+      {"matcher":"","hooks":[{"type":"command","command":"python","args":["${CLAUDE_PLUGIN_ROOT}/timestamps.py","stop"]}]}
+    ],
+    "SessionEnd": [
+      {"matcher":"","hooks":[{"type":"command","command":"python","args":["${CLAUDE_PLUGIN_ROOT}/timestamps.py","session_end"],"async":true}]}
+    ]
+  }
+}

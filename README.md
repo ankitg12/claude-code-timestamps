@@ -26,7 +26,17 @@ SessionEnd says:       [09:22:01 AM] — session ending (logout) — Claude 4m12
 
 ## Install
 
-### Option A — Let Claude do it (recommended)
+### Option A — Plugin (one command, recommended)
+
+```
+/plugin add --from https://github.com/ankitg12/claude-code-timestamps
+```
+
+Installs the script and wires all 12 hooks automatically. No settings.json editing needed. Activate with `/plugins` to confirm.
+
+> **Requires Python 3 on PATH as `python`.** macOS/Linux users: if your Python is `python3`, clone the repo and edit `.claude-plugin/plugin.json` to use `python3` instead.
+
+### Option B — Let Claude do it
 
 Paste this into Claude Code chat:
 
@@ -34,12 +44,11 @@ Paste this into Claude Code chat:
 Please install claude-code-timestamps globally (under ~/.claude/):
 1. Download to ~/.claude/hooks/timestamps.py (create dir if needed):
    https://raw.githubusercontent.com/ankitg12/claude-code-timestamps/main/timestamps.py
-2. Merge the hooks from https://github.com/ankitg12/claude-code-timestamps into ~/.claude/settings.json
-   preserving all existing config. The hooks block is in the README.
+2. Merge the hooks below into ~/.claude/settings.json preserving all existing config.
 3. Validate settings.json is valid JSON, then run /hooks to activate.
 ```
 
-### Option B — Manual
+### Option C — Manual
 
 **1. Download the script:**
 
