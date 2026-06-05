@@ -236,8 +236,11 @@ def main() -> None:
         except Exception:
             pass
         banner = f"[{now()}] — response complete{turn_part}{session_part}"
-        context = f"Turn took{turn_part}." + (f" Session total{session_part.replace(' | session ', ': ')}." if session_part else "")
-        combined_output("Stop", banner, context)
+        if turn_part:
+            context = f"Turn took{turn_part}." + (f" Session total{session_part.replace(' | session ', ': ')}." if session_part else "")
+            combined_output("Stop", banner, context)
+        else:
+            sys_msg(banner)
         (_TIMING_DIR / f"{sid}.last_stop").write_text(str(t), encoding="utf-8")
 
     elif mode == "session_end":
