@@ -117,6 +117,17 @@ def additional_ctx(event_name: str, msg: str) -> None:
     }))
 
 
+def combined_output(event_name: str, banner: str, context: str) -> None:
+    """Emit systemMessage (visible banner) + additionalContext (Claude's context) in one response."""
+    print(json.dumps({
+        "systemMessage": banner,
+        "hookSpecificOutput": {
+            "hookEventName": event_name,
+            "additionalContext": context,
+        }
+    }))
+
+
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
@@ -177,7 +188,9 @@ def main() -> None:
         data = read_stdin()
         agent_type = data.get("agent_type", "subagent")
         elapsed = elapsed_global(_SUBAGENT_START_FILE)
-        sys_msg(f"[{now()}] ↘ {agent_type} subagent done{elapsed}")
+        banner = f"[{now()}] ↘ {agent_type} subagent done{elapsed}"
+        context = f"{agent_type} subagent completed{elapsed}."
+        combined_output("SubagentStop", banner, context)
 
     elif mode == "task_create":
         data = read_stdin()
@@ -222,7 +235,9 @@ def main() -> None:
                 session_part = f" | session {fmt_secs(total)}"
         except Exception:
             pass
-        sys_msg(f"[{now()}] — response complete{turn_part}{session_part}")
+        banner = f"[{now()}] — response complete{turn_part}{session_part}"
+        context = f"Turn took{turn_part}." + (f" Session total{session_part.replace(' | session ', ': ')}." if session_part else "")
+        combined_output("Stop", banner, context)
         (_TIMING_DIR / f"{sid}.last_stop").write_text(str(t), encoding="utf-8")
 
     elif mode == "session_end":
