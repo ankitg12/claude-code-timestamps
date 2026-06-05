@@ -8,32 +8,34 @@ functionality: per-session turn/session timing keyed by session_id.
 State directory: ~/.claude/session_timing/<session_id>.{turn_start,session_start,total}
 
 Event → mode argument → async?
-  SessionStart       session_start   async  (init timing state; fire-and-forget)
-  UserPromptSubmit   prompt          sync   (write turn_start; elapsed available at Stop)
-  PostToolUse        tool            async  (additionalContext in next model call)
-  PostToolUseFailure tool_fail       sync   (appears before next model call)
-  SubagentStart      subagent_start  async  (fire-and-forget)
-  SubagentStop       subagent_stop   sync   (elapsed since subagent_start)
-  TaskCreated        task_create     async  (fire-and-forget)
-  TaskCompleted      task_done       sync   (appears in context)
-  PreCompact         pre_compact     sync   (message enters context before compaction)
-  PostCompact        post_compact    sync   (elapsed since pre_compact)
-  Stop               stop            sync   (turn elapsed + session total)
-  SessionEnd         session_end     async  (Claude compute vs wall time + cleanup)
+  SessionStart       session_start    async  (init timing state; fire-and-forget)
+  UserPromptSubmit   prompt           sync   (write turn_start; elapsed available at Stop)
+  PostToolUse        tool             async  (systemMessage banner per tool)
+  PostToolUseFailure tool_fail        sync   (appears before next model call)
+  SubagentStart      subagent_start   async  (fire-and-forget)
+  SubagentStop       subagent_stop    sync   (elapsed since subagent_start)
+  TaskCreated        task_create      async  (fire-and-forget)
+  TaskCompleted      task_done        sync   (appears in context)
+  PreCompact         pre_compact      sync   (message enters context before compaction)
+  PostCompact        post_compact     sync   (elapsed since pre_compact)
+  Stop               stop             sync   (turn elapsed + session total)
+  SessionEnd         session_end      async  (Claude compute vs wall time + cleanup)
+  MessageDisplay     message_display  sync   (prepend timestamp to first chunk of each response)
 
 Usage in settings.json:
-  SessionStart:       python "...timestamps.py" session_start   [async]
+  SessionStart:       python "...timestamps.py" session_start    [async]
   UserPromptSubmit:   python "...timestamps.py" prompt
-  PostToolUse:        python "...timestamps.py" tool            [async]
+  PostToolUse:        python "...timestamps.py" tool             [async]
   PostToolUseFailure: python "...timestamps.py" tool_fail
-  SubagentStart:      python "...timestamps.py" subagent_start  [async]
+  SubagentStart:      python "...timestamps.py" subagent_start   [async]
   SubagentStop:       python "...timestamps.py" subagent_stop
-  TaskCreated:        python "...timestamps.py" task_create     [async]
+  TaskCreated:        python "...timestamps.py" task_create      [async]
   TaskCompleted:      python "...timestamps.py" task_done
   PreCompact:         python "...timestamps.py" pre_compact
   PostCompact:        python "...timestamps.py" post_compact
   Stop:               python "...timestamps.py" stop
-  SessionEnd:         python "...timestamps.py" session_end     [async]
+  SessionEnd:         python "...timestamps.py" session_end      [async]
+  MessageDisplay:     python "...timestamps.py" message_display
 """
 import json
 import sys
@@ -236,12 +238,23 @@ def main() -> None:
         except Exception:
             pass
         banner = f"[{now()}] — response complete{turn_part}{session_part}"
-        if turn_part:
-            context = f"Turn took{turn_part}." + (f" Session total{session_part.replace(' | session ', ': ')}." if session_part else "")
-            combined_output("Stop", banner, context)
-        else:
-            sys_msg(banner)
+        sys_msg(banner)
         (_TIMING_DIR / f"{sid}.last_stop").write_text(str(t), encoding="utf-8")
+
+    elif mode == "message_display":
+        data = read_stdin()
+        delta = data.get("delta", "")
+        index = data.get("index", 1)
+        if index == 0:
+            display = f"[{now()}]\n{delta}"
+        else:
+            display = delta
+        print(json.dumps({
+            "hookSpecificOutput": {
+                "hookEventName": "MessageDisplay",
+                "displayContent": display,
+            }
+        }))
 
     elif mode == "session_end":
         data = read_stdin()

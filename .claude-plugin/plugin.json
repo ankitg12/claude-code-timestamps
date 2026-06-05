@@ -1,6 +1,6 @@
 {
   "name": "claude-code-timestamps",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Wall-clock timestamps at 12 CC lifecycle events. Idle gap detection, per-session timing, Claude compute vs wall time. Zero dependencies.",
   "author": {
     "name": "Ankit Gaur",
@@ -46,6 +46,9 @@
     ],
     "SessionEnd": [
       {"matcher":"","hooks":[{"type":"command","command":"python","args":["${CLAUDE_PLUGIN_ROOT}/timestamps.py","session_end"],"async":true}]}
+    ],
+    "MessageDisplay": [
+      {"matcher":"","hooks":[{"type":"command","command":"python","args":["${CLAUDE_PLUGIN_ROOT}/timestamps.py","message_display"]}]}
     ]
   }
 }
